@@ -57,6 +57,10 @@ app.post('/api/v1/user/find', async (req, res) => {
   }
 })
 
+app.get("/", (req,res) => {
+  res.sendStatus(200)
+})
+
 let PORT = process.env.PORT || 4545
 app.listen(PORT, () =>
   console.log(`⚡⚡ Server listening to port ${PORT} ⚡⚡`)
