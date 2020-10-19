@@ -1,0 +1,9 @@
+POST http://localhost:4545/api/v1/admin/login
+Content-Type: application/json
+
+{
+    "email":"cmsharer@gmail.com",
+    "password":"cmsharer@gmail.com"
+}
+
+###
