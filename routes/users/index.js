@@ -4,15 +4,15 @@ const User = require("../../mongodb/modals/users");
 
 router.post("/addOne", async (req, res) => {
   console.log(req.body);
-  let _id = req.body.uid;
-  let user = await User.findOne({ _id });
+  let guid = req.body.uid;
+  let user = await User.findOne({ guid });
   if (!user) {
     let email = req.body.email;
     let username = req.body.username;
     let picture = req.body.picture;
     let joinedOn = new Date();
     user = new User({
-      _id,
+      guid,
       username,
       email,
       picture,

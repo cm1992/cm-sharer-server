@@ -14,9 +14,6 @@ app.use(bodyParser.json());
 let routes = require("./routes");
 app.use("/api/v1", routes);
 
-//drive API
-const { driveFileExists } = require("./driveAPI");
-
 let PORT = process.env.PORT || 4545;
 app.listen(PORT, () =>
   console.log(`⚡⚡ Server listening to port ${PORT} ⚡⚡`)

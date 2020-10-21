@@ -2,18 +2,10 @@ const fs = require("fs");
 const readline = require("readline");
 const { google } = require("googleapis");
 const path = require("path");
-// If modifying these scopes, delete token.json.
+
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
 const TOKEN_PATH = path.join(__dirname, "token.json");
-/**
- * Create an OAuth2 client with the given credentials, and then execute the
- * given callback function.
- * @param {Object} credentials The authorization client credentials.
- * @param {function} callback The callback to call with the authorized client.
- */
+
 function authorize(credentials, callback) {
   const { client_secret, client_id, redirect_uris } = credentials.web;
   const oAuth2Client = new google.auth.OAuth2(
@@ -30,12 +22,6 @@ function authorize(credentials, callback) {
   });
 }
 
-/**
- * Get and store new token after prompting for user authorization, and then
- * execute the given callback with the authorized OAuth2 client.
- * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback for the authorized client.
- */
 function getAccessToken(oAuth2Client, callback) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: "offline",
@@ -61,12 +47,8 @@ function getAccessToken(oAuth2Client, callback) {
   });
 }
 
-/**
- * Lists the names and IDs of up to 10 files.
- * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- */
-function driveFileExists() {
-  // Load client secrets from a local file.
+function driveFileExists(fileId) {
+  console.log(fileId);
   return new Promise((resolve, reject) => {
     fs.readFile(path.join(__dirname, "credentials.json"), (err, content) => {
       if (err) return console.log("Error loading client secret file:", err);
@@ -75,13 +57,15 @@ function driveFileExists() {
         const drive = google.drive({ version: "v3", auth });
         drive.files
           .get({
-            fileId: "1umiPvxtH5crLGYXv8mGrHYG7G3rh1MUL",
+            fileId,
             supportsAllDrives: true,
+            fields: "*",
           })
           .then((result) => {
             resolve({ result: result.data });
           })
           .catch((err) => {
+            console.log(err);
             reject({ err });
           });
       });

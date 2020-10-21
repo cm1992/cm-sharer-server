@@ -2,11 +2,15 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 
 router.post("/authenticate", (req, res) => {
-  const accessToken = req.body;
+  const accessToken = req.body.accessToken;
+  console.log(accessToken);
   if (!accessToken) {
-    res.send({ error: "unauthorized" });
+    res.send({ error: "no token sent" });
   } else {
-    res.send({ authorized: true });
+    jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      if (err) return res.send({ error: "unauthorized" });
+      res.send({ authorized: true });
+    });
   }
 });
 
