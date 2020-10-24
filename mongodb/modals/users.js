@@ -5,6 +5,8 @@ let userSchema = new mongoose.Schema({
   username: String,
   email: String,
   picture: String,
+  state: String,
+  downloads: Number,
   joinedOn: Date,
 });
 

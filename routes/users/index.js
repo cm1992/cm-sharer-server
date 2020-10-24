@@ -1,5 +1,4 @@
 const router = require("express").Router();
-
 const User = require("../../mongodb/modals/users");
 
 router.post("/addOne", async (req, res) => {
@@ -42,6 +41,16 @@ router.get("/getAll", async (req, res) => {
         res.send({ err });
       }
       res.send({ users });
+    });
+});
+
+router.delete("/:guid", (req, res) => {
+  User.deleteOne({ guid: req.params.guid })
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      res.sendStatus(500);
     });
 });
 
