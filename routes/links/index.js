@@ -1,6 +1,31 @@
 const router = require("express").Router();
 const Link = require("../../mongodb/modals/links");
 const Download = require("../../mongodb/modals/downloads");
+const { driveFileExists } = require("../drive/main");
+
+router.post("/getFile", async (req, res) => {
+  const fileId = req.body.fileId;
+  let exists = await Link.findOne({ fileId });
+  console.log(exists);
+  if (!fileId || !exists) {
+    res.json({ fileExists: false });
+  } else {
+    try {
+      let data = await driveFileExists(fileId);
+      if (data && data.result) {
+        res.json({
+          fileExists: true,
+          file: data.result,
+        });
+      } else {
+        res.json({ fileExists: false });
+      }
+    } catch (error) {
+      res.sendStatus(500);
+      console.log(error);
+    }
+  }
+});
 
 router.get("/getAll", async (req, res) => {
   Link.find({})
