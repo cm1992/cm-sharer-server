@@ -4,6 +4,27 @@ const Download = require("../../mongodb/modals/downloads");
 const { driveFileExists } = require("../drive/main");
 const auth = require("../../auth");
 
+router.post("/downloadOne", async (req, res) => {
+  const fileId = req.body.fileId;
+  const userId = req.body.userId;
+  try {
+    let link = await Link.findOne({ fileId });
+    link.downloads++;
+    let download = new Download({
+      fileId,
+      fileName: link.fileName,
+      userId,
+      date: new Date(),
+    });
+    await download.save();
+    await link.save();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
 router.post("/getFile", async (req, res) => {
   const fileId = req.body.fileId;
   let exists = await Link.findOne({ fileId });
@@ -39,28 +60,7 @@ router.post("/getAll", auth.admin, async (req, res) => {
     });
 });
 
-router.post("/downloadOne", async (req, res) => {
-  const fileId = req.body.fileId;
-  const userId = req.body.userId;
-  try {
-    let link = await Link.findOne({ fileId });
-    link.downloads++;
-    let download = new Download({
-      fileId,
-      fileName: link.fileName,
-      userId,
-      date: new Date(),
-    });
-    await download.save();
-    await link.save();
-    res.sendStatus(200);
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
-
-router.delete("/:id", auth.admin, (req, res) => {
+router.delete("/:id", (req, res) => {
   Link.deleteOne({ _id: req.params.id })
     .then(() => {
       res.sendStatus(204);

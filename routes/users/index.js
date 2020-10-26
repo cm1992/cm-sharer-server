@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const User = require("../../mongodb/modals/users");
+const auth = require("../../auth");
 
 router.post("/addOne", async (req, res) => {
   console.log(req.body);
@@ -44,8 +45,8 @@ router.get("/getAll", async (req, res) => {
     });
 });
 
-router.delete("/:guid", (req, res) => {
-  User.deleteOne({ guid: req.params.guid })
+router.delete("/:_id", (req, res) => {
+  User.deleteOne({ _id: req.params._id })
     .then(() => {
       res.sendStatus(204);
     })
