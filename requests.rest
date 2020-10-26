@@ -1,8 +1,8 @@
-GET http://localhost:4545/api/v1/stats/getall/:accessToken
+POST http://localhost:4545/api/v1/links/search/.png
 Content-Type: application/json
 
 {
-    "fileId":"1wskmp6ryJwrHz7YeMY6TjXAR-PjlZ3gf"
+    "accessToken":"eyJhbGciOiJIUzI1NiJ9.Y21zaGFyZXJAZ21haWwuY29t.w2f2JOS8qyL8rzNE4UE6DvvuK2KVdofVizlryPt6xGs"
 }
 
 ###

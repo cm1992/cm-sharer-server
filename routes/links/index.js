@@ -2,6 +2,7 @@ const router = require("express").Router();
 const Link = require("../../mongodb/modals/links");
 const Download = require("../../mongodb/modals/downloads");
 const { driveFileExists } = require("../drive/main");
+const auth = require("../../auth");
 
 router.post("/getFile", async (req, res) => {
   const fileId = req.body.fileId;
@@ -27,7 +28,7 @@ router.post("/getFile", async (req, res) => {
   }
 });
 
-router.get("/getAll", async (req, res) => {
+router.post("/getAll", auth.admin, async (req, res) => {
   Link.find({})
     .then((links) => {
       console.log(links);
@@ -59,13 +60,26 @@ router.post("/downloadOne", async (req, res) => {
   }
 });
 
-router.delete("/:id", (req, res) => {
-  console.log(req.params);
+router.delete("/:id", auth.admin, (req, res) => {
   Link.deleteOne({ _id: req.params.id })
     .then(() => {
       res.sendStatus(204);
     })
     .catch((err) => {
+      res.sendStatus(500);
+    });
+});
+
+router.post("/search/:q", auth.admin, (req, res) => {
+  const q = req.params.q || "";
+
+  Link.find({ fileName: { $regex: q, $options: "i" } })
+    .then((docs) => {
+      console.log(docs);
+      res.json(docs);
+    })
+    .catch((err) => {
+      console.log(err);
       res.sendStatus(500);
     });
 });
