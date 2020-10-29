@@ -1,8 +1,8 @@
 const router = require("express").Router();
 const User = require("../../mongodb/modals/users");
-const auth = require("../../auth");
+const auth = require("../../auth");""
 
-router.post("/addOne", async (req, res) => {
+router.post("/addOne", auth.admin, async (req, res) => {
   console.log(req.body);
   let guid = req.body.uid;
   let user = await User.findOne({ guid });
@@ -34,7 +34,7 @@ router.post("/addOne", async (req, res) => {
   }
 });
 
-router.get("/getAll", async (req, res) => {
+router.get("/getAll", auth.admin, async (req, res) => {
   User.find({})
     .sort("joinedOn")
     .exec(function (err, users) {
@@ -45,7 +45,7 @@ router.get("/getAll", async (req, res) => {
     });
 });
 
-router.delete("/:_id", (req, res) => {
+router.delete("/:_id", auth.admin, (req, res) => {
   User.deleteOne({ _id: req.params._id })
     .then(() => {
       res.sendStatus(204);

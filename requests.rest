@@ -1,8 +1,5 @@
-POST http://localhost:4545/api/v1/links/search/.png
-Content-Type: application/json
-
-{
-    "accessToken":"eyJhbGciOiJIUzI1NiJ9.Y21zaGFyZXJAZ21haWwuY29t.w2f2JOS8qyL8rzNE4UE6DvvuK2KVdofVizlryPt6xGs"
-}
 
 ###
+
+GET https://cloud-api.yandex.net/v1/disk/public/resources?public_key=https://yadi.sk/i/PoeFTX4ryb3P1g
+

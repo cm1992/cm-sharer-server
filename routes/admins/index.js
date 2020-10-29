@@ -29,7 +29,7 @@ router.post("/login", async (req, res) => {
             admin.email,
             process.env.ACCESS_TOKEN_SECRET
           );
-          res.json({ authorized: true, error: null, accessToken });
+          res.json({ authorized: true, accessToken });
         } else {
           res.json({
             authorized: false,
@@ -38,17 +38,18 @@ router.post("/login", async (req, res) => {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+      res.json({
+        authorized: false,
+        message: "Internal Server Error.",
+      });
       console.log(error);
     }
   }
 });
 
-router.post("/addaccount", async (req, res) => {
-  const accessToken = req.body.accessToken,
-    email = req.body.email,
+router.post("/addaccount", auth.admin, async (req, res) => {
+  const email = req.body.email,
     password = req.body.password;
-  console.log(accessToken);
   if (!email) {
     res.json({ result: false, message: "Please provide an Email." });
   } else if (!password) {
@@ -104,16 +105,10 @@ router.post("/getProfile", auth.admin, (req, res) => {
 });
 
 router.post("/update/username", auth.admin, async (req, res) => {
-  const accessToken = req.body.accessToken;
   const email = req.body.email;
   const username = req.body.username;
 
-  if (!accessToken) {
-    res.send({
-      error: "Unauthorized Access",
-      message: "No access token sent to the server",
-    });
-  } else if (!username) {
+  if (!username) {
     res.send({
       error: "Username Not Provided",
     });
@@ -122,21 +117,14 @@ router.post("/update/username", auth.admin, async (req, res) => {
       error: "Email Missing",
     });
   } else {
-    jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-      if (err)
-        return res.send({
-          error: "Unauthorized Access",
-          message: "No access token sent to the server",
-        });
-      Admin.updateOne({ email }, { username })
-        .then((admin) => {
-          res.sendStatus(200);
-        })
-        .catch((err) => {
-          console.log(err);
-          res.sendStatus(500);
-        });
-    });
+    Admin.updateOne({ email }, { username })
+      .then((admin) => {
+        res.sendStatus(200);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+      });
   }
 });
 
