@@ -1,32 +1,35 @@
 const router = require("express").Router();
 const Link = require("../../mongodb/modals/links");
 const Download = require("../../mongodb/modals/downloads");
-const { driveFileExists } = require("../drive/main");
 const auth = require("../../auth");
 const request = require("request");
 
 router.post("/add/drive", auth.admin, async (req, res) => {
-  const fileId = req.body.file.id;
-  const fileName = req.body.file.name;
+  const fileId = req.body.id;
+  const fileName = req.body.name;
   let link = await Link.findOne({ fileId });
   if (!link) {
     let createdOn = new Date();
     link = new Link({
       fileId,
       fileName,
+      slug: encodeURI(fileName.replace(/[ \{\[\}\]]/g, "-")).toLowerCase(),
       type: "gdrive",
       createdOn,
       downloads: 0,
     });
     link
       .save()
-      .then((result) => {
-        console.log(result);
-        res.sendStatus(200);
+      .then(() => {
+        res.json({
+          message: "Link successfully generated for this file.",
+          slug: encodeURI(fileName.replace(/[ \{\[\}\]]/g, "-")).toLowerCase(),
+        });
       })
       .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
+        res.json({
+          message: "Internal Server Error.",
+        });
       });
   } else {
     res.json({ message: "Link already generated for this file." });
@@ -40,13 +43,11 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
     if (link) {
       res.json({ message: "Link Already Generated for this file" });
     } else {
-      console.log(public_key);
       request(
         "https://cloud-api.yandex.net/v1/disk/public/resources?public_key=" +
           public_key,
         function (error, response, body) {
           body = JSON.parse(body);
-          console.log(body);
           if (error) {
             res.send({ message: "Could not generate Link", error });
           } else if (body.error) {
@@ -54,7 +55,9 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
           } else {
             link = new Link({
               public_key,
-              slug: body.name,
+              slug: encodeURI(
+                body.name.replace(/[ \{\[\}\]]/g, "-")
+              ).toLowerCase(),
               fileName: body.name,
               createdOn: new Date(),
               fileType: body.mime_type,
@@ -66,7 +69,12 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
             link
               .save()
               .then((result) => {
-                res.json({ message: "Link was Added", slug: body.name });
+                res.json({
+                  message: "Link was Added",
+                  slug: encodeURI(
+                    body.name.replace(/[ \{\[\}\]]/g, "-")
+                  ).toLowerCase(),
+                });
               })
               .catch((error) => {
                 res.json({ message: "error adding link" });
@@ -88,7 +96,6 @@ router.get("/yandex/:slug", auth.admin, (req, res) => {
       res.json(result);
     })
     .catch((err) => {});
-  console.log(slug);
 });
 
 router.post("/downloadOne", async (req, res) => {
@@ -112,34 +119,19 @@ router.post("/downloadOne", async (req, res) => {
   }
 });
 
-router.post("/getFile", async (req, res) => {
-  const fileId = req.body.fileId;
-  let exists = await Link.findOne({ fileId });
-  console.log(exists);
-  if (!fileId || !exists) {
+router.get("/drive/:id", auth.admin, async (req, res) => {
+  const fileId = req.params.id;
+  let link = await Link.findOne({ fileId });
+  if (!fileId || !link) {
     res.json({ fileExists: false });
   } else {
-    try {
-      let data = await driveFileExists(fileId);
-      if (data && data.result) {
-        res.json({
-          fileExists: true,
-          file: data.result,
-        });
-      } else {
-        res.json({ fileExists: false });
-      }
-    } catch (error) {
-      res.sendStatus(500);
-      console.log(error);
-    }
+    res.json({ fileExists: true, ...link._doc });
   }
 });
 
-router.get("/all", auth.admin, async (req, res) => {
-  Link.find({})
+router.get("/:type", auth.admin, async (req, res) => {
+  Link.find({ type: req.params.type })
     .then((links) => {
-      console.log(links);
       res.json(links);
     })
     .catch((err) => {
@@ -157,8 +149,12 @@ router.delete("/:id", auth.admin, (req, res) => {
     });
 });
 
-router.get("/search/:q", auth.admin, (req, res) => {
-  Link.find({ fileName: { $regex: req.params.q, $options: "i" } })
+router.post("/search", auth.admin, (req, res) => {
+  console.log(req.body);
+  Link.find({
+    fileName: { $regex: req.body.q, $options: "i" },
+    type: req.body.type,
+  })
     .then((docs) => {
       res.json(docs);
     })
