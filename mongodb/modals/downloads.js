@@ -1,7 +1,7 @@
 let mongoose = require("mongoose");
 
 let downloadSchema = new mongoose.Schema({
-  fileId: String,
+  linkId: mongoose.Schema.Types.ObjectId,
   fileName: String,
   userId: String,
   date: Date,
