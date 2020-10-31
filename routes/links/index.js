@@ -79,12 +79,12 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
               .save()
               .then((result) => {
                 res.json({
-                  message: "Link was Added",
+                  message: "Link was just Added",
                   slug,
                 });
               })
               .catch((error) => {
-                res.json({ message: "error adding link" });
+                res.json({ message: "Error adding link" });
                 console.log(error);
               });
           }
