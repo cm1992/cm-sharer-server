@@ -5,6 +5,20 @@ const auth = require("../../auth");
 const request = require("request");
 const escapeStringRegexp = require("escape-string-regexp");
 
+//get a link
+router.get("/:type/:slug", (req, res) => {
+  const slug = req.params.slug;
+  const type = req.params.type;
+  console.log(req.params);
+  Link.findOne({ type, slug })
+    .then((link) => {
+      res.json({ linkExists: true, ...link._doc });
+    })
+    .catch((err) => {
+      res.json({ linkExists: false });
+    });
+});
+
 //generate drive link
 router.post("/add/drive", auth.admin, async (req, res) => {
   const fileId = req.body.id;
@@ -95,20 +109,6 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
   } catch (error) {
     res.json({ msg: "Internal Server Error" });
   }
-});
-
-//get one yandex file by slug param
-router.get("/:type/:slug", auth.admin, (req, res) => {
-  const slug = req.params.slug;
-  const type = req.params.type;
-  console.log(req.params);
-  Link.findOne({ type, slug })
-    .then((link) => {
-      res.json({ linkExists: true, ...link._doc });
-    })
-    .catch((err) => {
-      res.json({ linkExists: false });
-    });
 });
 
 // delete link by id param
