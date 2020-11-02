@@ -47,7 +47,7 @@ function getAccessToken(oAuth2Client, callback) {
   });
 }
 
-function driveFileExists(fileId) {
+function drivelinkExists(fileId) {
   console.log(fileId);
   return new Promise((resolve, reject) => {
     fs.readFile(path.join(__dirname, "credentials.json"), (err, content) => {
@@ -73,4 +73,4 @@ function driveFileExists(fileId) {
   });
 }
 
-module.exports = { driveFileExists };
+module.exports = { drivelinkExists };

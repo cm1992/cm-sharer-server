@@ -3,12 +3,13 @@ const Link = require("../../mongodb/modals/links");
 const Download = require("../../mongodb/modals/downloads");
 const auth = require("../../auth");
 const request = require("request");
+const escapeStringRegexp = require("escape-string-regexp");
 
 //generate drive link
 router.post("/add/drive", auth.admin, async (req, res) => {
   const fileId = req.body.id;
   const fileName = req.body.name;
-  const slug = encodeURI(fileName.replace(/[ \{\[\}\]]/g, "-")).toLowerCase();
+  const slug = encodeURI(fileName.replace(/[ \.\{\[\}\]]/g, "-")).toLowerCase();
   const size = req.body.size;
   const videoMediaMetadata = req.body.videoMediaMetadata;
   let link = await Link.findOne({ fileId });
@@ -28,15 +29,15 @@ router.post("/add/drive", auth.admin, async (req, res) => {
     link
       .save()
       .then(() => {
-        res.json({ slug });
+        res.json({ slug, msg: "Link was just added" });
       })
       .catch((err) => {
         res.json({
-          error: "Internal Server Error.",
+          msg: "Internal Server Error",
         });
       });
   } else {
-    res.json({ warning: "Link already generated for this file." });
+    res.json({ slug: link.slug, msg: "Link already generated" });
   }
 });
 
@@ -48,7 +49,7 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
     if (link) {
       res.json({
         slug: link.slug,
-        message: "Link Already Generated for this file",
+        msg: "Link Already Generated",
       });
     } else {
       request(
@@ -57,12 +58,12 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
         function (error, response, body) {
           body = JSON.parse(body);
           if (error) {
-            res.send({ message: "Could not generate Link", error });
+            res.send({ msg: "Could not generate Link", error });
           } else if (body.error) {
-            res.send({ message: "File not found" });
+            res.send({ msg: "File not found" });
           } else {
             const slug = encodeURI(
-              body.name.replace(/[ \{\[\}\]]/g, "-")
+              body.name.replace(/[ \.\{\[\}\]]/g, "-")
             ).toLowerCase();
             link = new Link({
               public_key,
@@ -79,12 +80,12 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
               .save()
               .then((result) => {
                 res.json({
-                  message: "Link was just Added",
+                  msg: "Link was just Added",
                   slug,
                 });
               })
               .catch((error) => {
-                res.json({ message: "Error adding link" });
+                res.json({ msg: "Error adding link" });
                 console.log(error);
               });
           }
@@ -92,30 +93,22 @@ router.post("/add/yandex", auth.admin, async (req, res) => {
       );
     }
   } catch (error) {
-    res.json({ message: "Internal Server Error" });
+    res.json({ msg: "Internal Server Error" });
   }
 });
 
 //get one yandex file by slug param
-router.get("/yandex/:slug", auth.admin, (req, res) => {
+router.get("/:type/:slug", auth.admin, (req, res) => {
   const slug = req.params.slug;
-  Link.findOne({ slug })
-    .then((result) => {
-      res.json(result);
+  const type = req.params.type;
+  console.log(req.params);
+  Link.findOne({ type, slug })
+    .then((link) => {
+      res.json({ linkExists: true, ...link._doc });
     })
-    .catch((err) => {});
-});
-
-//get one drive file by slug param
-router.get("/drive/:slug", auth.admin, async (req, res) => {
-  const slug = req.params.slug;
-  console.log(slug);
-  let link = await Link.findOne({ slug, type: "gdrive" });
-  if (!link) {
-    res.json({ fileExists: false });
-  } else {
-    res.json({ fileExists: true, ...link._doc });
-  }
+    .catch((err) => {
+      res.json({ linkExists: false });
+    });
 });
 
 // delete link by id param
@@ -132,7 +125,7 @@ router.delete("/:id", auth.admin, (req, res) => {
 // search for link by name
 router.post("/search", auth.admin, (req, res) => {
   Link.find({
-    fileName: { $regex: req.body.q, $options: "i" },
+    fileName: { $regex: escapeStringRegexp(req.body.q), $options: "i" },
     type: req.body.type,
   })
     .then((docs) => {
@@ -144,6 +137,7 @@ router.post("/search", auth.admin, (req, res) => {
     });
 });
 
+// save download info
 router.post("/download", async (req, res) => {
   console.log(req.body);
   const linkId = req.body._id;
