@@ -128,6 +128,8 @@ router.post("/search", auth.admin, (req, res) => {
     fileName: { $regex: escapeStringRegexp(req.body.q), $options: "i" },
     type: req.body.type,
   })
+    .sort({ createdOn: -1 })
+    .exec()
     .then((docs) => {
       res.json(docs);
     })
