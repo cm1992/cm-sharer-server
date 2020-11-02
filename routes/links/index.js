@@ -5,7 +5,7 @@ const auth = require("../../auth");
 const request = require("request");
 const escapeStringRegexp = require("escape-string-regexp");
 
-//get a link
+//get a link by type & slug params
 router.get("/:type/:slug", (req, res) => {
   const slug = req.params.slug;
   const type = req.params.type;
