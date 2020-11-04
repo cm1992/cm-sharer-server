@@ -5,20 +5,7 @@ const auth = require("../../auth");
 const request = require("request");
 const escapeStringRegexp = require("escape-string-regexp");
 
-//get a link by type & slug params
-router.get("/:type/:slug", (req, res) => {
-  const slug = req.params.slug;
-  const type = req.params.type;
-  console.log(req.params);
-  Link.findOne({ type, slug })
-    .then((link) => {
-      res.json({ linkExists: true, ...link._doc });
-    })
-    .catch((err) => {
-      res.json({ linkExists: false });
-    });
-});
-
+//---------BEGIN-ADMINISTRATOR-----------
 //generate drive link
 router.post("/add/drive", auth.admin, async (req, res) => {
   const fileId = req.body.id;
@@ -139,7 +126,25 @@ router.post("/search", auth.admin, (req, res) => {
     });
 });
 
-// save download info
+//---------END-ADMINISTRATOR-----------
+
+//---------BEGIN-PUBLIC-----------
+
+//get a link by type & slug params
+router.get("/:type/:slug", (req, res) => {
+  const slug = req.params.slug;
+  const type = req.params.type;
+  console.log(req.params);
+  Link.findOne({ type, slug })
+    .then((link) => {
+      res.json({ linkExists: true, ...link._doc });
+    })
+    .catch((err) => {
+      res.json({ linkExists: false });
+    });
+});
+
+// save download info to db
 router.post("/download", async (req, res) => {
   console.log(req.body);
   const linkId = req.body._id;
@@ -163,5 +168,7 @@ router.post("/download", async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+//---------END-PUBLIC-----------
 
 module.exports = router;
