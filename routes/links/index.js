@@ -112,7 +112,7 @@ router.post("/add/opendrive", auth.admin, async (req, res) => {
       request(
         "https://dev.opendrive.com/api/v1/file/info.json/" + fileId,
         function (error, response, body) {
-          console.log(error, response, body);
+          console.log(body, fileId);
           body = JSON.parse(body);
           if (error) {
             res.send({ msg: "Could not generate Link", error });
