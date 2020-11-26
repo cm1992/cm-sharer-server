@@ -12,4 +12,8 @@ router.use("/links", links);
 router.use("/drive", drive);
 router.use("", misc);
 
+router.get("/", (req, res) => {
+  res.sendStatus(200);
+});
+
 module.exports = router;
