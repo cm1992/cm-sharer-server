@@ -203,7 +203,7 @@ router.get("/:type/:slug", (req, res) => {
 router.post("/download", async (req, res) => {
   console.log(req.body);
   const linkId = req.body._id;
-  const userId = req.body.userId;
+  const userId = req.body.userId || null;
   try {
     let link = await Link.findOne({ _id: linkId });
     link.downloads++;
