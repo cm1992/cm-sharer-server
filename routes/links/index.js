@@ -206,6 +206,7 @@ router.post("/download", async (req, res) => {
   const userId = req.body.userId || null;
   try {
     let link = await Link.findOne({ _id: linkId });
+    console.log(link);
     link.downloads++;
     const fileName = link.fileName;
     const date = new Date();
