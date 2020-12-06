@@ -1,9 +1,10 @@
 const router = require("express").Router();
 const User = require("../../mongodb/modals/users");
-const auth = require("../../auth");""
+const auth = require("../../auth");
+("");
 
 router.post("/addOne", auth.admin, async (req, res) => {
-  console.log(req.body);
+  console.log("------------", req.body);
   let guid = req.body.uid;
   let user = await User.findOne({ guid });
   if (!user) {
@@ -34,7 +35,7 @@ router.post("/addOne", auth.admin, async (req, res) => {
   }
 });
 
-router.get("/getAll", auth.admin, async (req, res) => {
+router.get("/all", auth.admin, async (req, res) => {
   User.find({})
     .sort("joinedOn")
     .exec(function (err, users) {

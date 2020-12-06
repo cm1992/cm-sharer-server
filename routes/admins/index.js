@@ -4,6 +4,17 @@ const Admin = require("../../mongodb/modals/admins");
 const jwt = require("jsonwebtoken");
 const auth = require("../../auth");
 
+router.get("/all", auth.admin, (req, res) => {
+  Admin.find({})
+    .sort("addedOn")
+    .exec(function (err, admins) {
+      if (err) {
+        res.send({ err });
+      }
+      res.send({ admins });
+    });
+});
+
 router.post("/authorize", auth.admin, async (req, res) => {
   res.json({ authorized: true });
 });
@@ -171,6 +182,16 @@ router.post("/update/password", auth.admin, async (req, res) => {
       console.log(error);
     }
   }
+});
+
+router.delete("/:_id", auth.admin, (req, res) => {
+  Admin.deleteOne({ _id: req.params._id })
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      res.sendStatus(500);
+    });
 });
 
 module.exports = router;

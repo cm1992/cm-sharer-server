@@ -4,7 +4,7 @@ const Link = require("../../mongodb/modals/links");
 const Download = require("../../mongodb/modals/downloads");
 const auth = require("../../auth");
 
-router.post("/stats/getall", auth.admin, async (req, res) => {
+router.get("/stats/getall", auth.admin, async (req, res) => {
   try {
     let users = (await User.find({})).length;
     let links = (await Link.find({})).length;
